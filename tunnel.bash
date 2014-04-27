@@ -115,7 +115,6 @@ function main()
                 ;;
             --configure)
                 shift
-
                 local configure='true'
                 ;;
             --local-port)
