@@ -44,11 +44,10 @@ function configure()
     local remoteUser="${1}"
     local remoteHost="${2}"
 
-    local sshdConfigFile='/etc/ssh/sshd_config'
     local commands="$(cat "${utilPath}")
                     checkRequireRootUser
-                    appendToFileIfNotFound "${sshdConfigFile}" '^\s*AllowTcpForwarding\s+yes\s*$' '\nAllowTcpForwarding yes'
-                    appendToFileIfNotFound "${sshdConfigFile}" '^\s*GatewayPorts\s+yes\s*$' 'GatewayPorts yes'
+                    appendToFileIfNotFound "${sshdConfigFile}" "${tcpForwardConfigPattern}" '\nAllowTcpForwarding yes'
+                    appendToFileIfNotFound "${sshdConfigFile}" "${gatewayConfigPattern}" 'GatewayPorts yes'
                     service ssh restart"
 
     ssh -n "${remoteUser}@${remoteHost}" "${commands}"
@@ -143,6 +142,12 @@ function main()
                 ;;
         esac
     done
+
+    # Global Config
+
+    sshdConfigFile='/etc/ssh/sshd_config'
+    tcpForwardConfigPattern='^\s*AllowTcpForwarding\s+yes\s*$'
+    gatewayConfigPattern='^\s*GatewayPorts\s+yes\s*$'
 
     if [[ "${configure}" = 'true' ]]
     then
