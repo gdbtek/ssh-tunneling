@@ -46,8 +46,8 @@ function configure()
 
     local commands="$(cat "${utilPath}")
                     checkRequireRootUser
-                    appendToFileIfNotFound '${sshdConfigFile}' '${tcpForwardConfigPattern}' '\nAllowTcpForwarding yes'
-                    appendToFileIfNotFound '${sshdConfigFile}' '${gatewayConfigPattern}' 'GatewayPorts yes'
+                    appendToFileIfNotFound '${sshdConfigFile}' '${tcpForwardConfigPattern}' '\nAllowTcpForwarding yes' 'true' 'true'
+                    appendToFileIfNotFound '${sshdConfigFile}' '${gatewayConfigPattern}' 'GatewayPorts yes' 'true' 'true'
                     service ssh restart"
 
     ssh -n "${remoteUser}@${remoteHost}" "${commands}"
@@ -82,15 +82,16 @@ function tunnel()
 
     if [[ "$(isEmptyString "${tcpForwardConfigFound}")" = 'true' || "$(isEmptyString "${gatewayConfigFound}")" = 'true' ]]
     then
-       error "\nWARNING :"
-       error "    - Your remote host '${remoteHost}' is NOT yet configured for tunneling. Run '--configure' to set it up!"
-       error "    - Will continue tunneling but it might not work for you!\n"
+       error   "\nWARNING :"
+       error   "    - Your remote host '${remoteHost}' is NOT yet configured for tunneling."
+       echo -e "    \033[1;31m- Run '\033[1;33m--configure\033[1;31m' to set it up!\033[0m"
+       error   "    - Will continue tunneling but it might NOT work for you!"
        sleep 5
     fi
 
     # Start Forwarding
 
-    echo -e "\033[1;35m${remoteHost}:${remotePort} \033[1;36mforwards to \033[1;32mlocalhost:${localPort}\033[0m\n"
+    echo -e "\n\033[1;35m${remoteHost}:${remotePort} \033[1;36mforwards to \033[1;32mlocalhost:${localPort}\033[0m\n"
 
     ssh -C -N -g -v \
         -p 22 \
