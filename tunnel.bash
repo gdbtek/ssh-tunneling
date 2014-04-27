@@ -46,6 +46,7 @@ function configure()
 
     local sshdConfigFile='/etc/ssh/sshd_config'
     local commands="$(cat "${utilPath}")
+                    checkRequireRootUser
                     appendToFileIfNotFound "${sshdConfigFile}" '^\s*AllowTcpForwarding\s+yes\s*$' '\nAllowTcpForwarding yes'
                     appendToFileIfNotFound "${sshdConfigFile}" '^\s*GatewayPorts\s+yes\s*$' 'GatewayPorts yes'
                     service ssh restart"
@@ -59,6 +60,19 @@ function tunnel()
     local remoteUser="${2}"
     local remoteHost="${3}"
     local remotePort="${4}"
+
+    local localProcess="$(lsof -Pi | grep -Fi ":${localPort} (LISTEN)" | head -1)"
+    local remoteProcess="$(ssh -n "${remoteUser}@${remoteHost}" lsof -Pi | grep -Fi ":${remotePort} (LISTEN)" | head -1)"
+
+    if [[ "$(isEmptyString "${localProcess}")" = 'true' ]]
+    then
+        fatal "\nERROR: local port ${localPort} is not running at local machine. Please pick another local running port number!\n"
+    fi
+
+    if [[ "$(isEmptyString "${remoteProcess}")" = 'false' ]]
+    then
+        fatal "\nERROR: remote port ${remotePort} is already taken at remote host '${remoteHost}'. Please pick another remote port number!\n"
+    fi
 
     echo -e "\033[1;35m${remoteHost}:${remotePort} \033[1;36mforwards to \033[1;32mlocalhost:${localPort}\033[0m\n"
 

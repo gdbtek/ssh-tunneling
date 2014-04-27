@@ -26,6 +26,14 @@ function isEmptyString()
     fi
 }
 
+function checkRequireRootUser()
+{
+    if [[ "$(whoami)" != 'root' ]]
+    then
+        fatal "ERROR: please run this program as 'root'"
+    fi
+}
+
 function appendToFileIfNotFound()
 {
     local file="${1}"
