@@ -67,7 +67,7 @@ function tunnel()
 
     if [[ "$(isEmptyString "${localProcess}")" = 'true' ]]
     then
-        fatal "\nERROR: local port ${localPort} is not running at local machine. Please pick another local running port!\n"
+        fatal "\nERROR: There is no process listening to port ${localPort} on the local machine. Please make sure your process is listening to the port before trying to tunnel!\n"
     fi
 
     if [[ "$(isEmptyString "${remoteProcess}")" = 'false' ]]
