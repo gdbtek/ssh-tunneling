@@ -67,12 +67,16 @@ function tunnel()
 
     if [[ "$(isEmptyString "${localProcess}")" = 'true' ]]
     then
-        fatal "\nERROR: There is no process listening to port ${localPort} on the local machine. Please make sure your process is listening to the port before trying to tunnel!\n"
+        error "\nERROR :"
+        error "    - There is no process listening to port ${localPort} on the local machine."
+        fatal "    - Please make sure your process is listening to the port before trying to tunnel.\n"
     fi
 
     if [[ "$(isEmptyString "${remoteProcess}")" = 'false' ]]
     then
-        fatal "\nERROR: remote port ${remotePort} is already taken at remote host '${remoteHost}'. Please pick another remote port!\n"
+        error "\nERROR :"
+        error "    - There is a process listening to port ${remotePort} on the remote machine '${remoteHost}'."
+        fatal "    - Please make sure your process is not listening to the port before trying to tunnel.\n"
     fi
 
     # Verify Remote Config
