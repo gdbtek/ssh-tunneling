@@ -26,12 +26,19 @@ function isEmptyString()
     fi
 }
 
+function checkRequireUser()
+{
+    local requireUser="${1}"
+
+    if [[ "$(whoami)" != "${requireUser}" ]]
+    then
+        fatal "ERROR: please run this program as '${requireUser}' user!"
+    fi
+}
+
 function checkRequireRootUser()
 {
-    if [[ "$(whoami)" != 'root' ]]
-    then
-        fatal "ERROR: please run this program as 'root'"
-    fi
+    checkRequireUser 'root'
 }
 
 function appendToFileIfNotFound()
