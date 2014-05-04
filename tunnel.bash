@@ -9,22 +9,25 @@ function displayUsage()
     echo    "    ${scriptName}"
     echo    "        --help"
     echo    "        --configure"
-    echo    "        --local-port <LOCAL_PORT>"
+    echo    "        --local-port  <LOCAL_PORT>"
+    echo    "        --remote-port <REMOTE_PORT>"
+    echo    "        --local-to-remote"
+    echo    "        --remote-to-local"
     echo    "        --remote-user <REMOTE_USER>"
     echo    "        --remote-host <REMOTE_HOST>"
-    echo    "        --remote-port <REMOTE_PORT>"
-    echo    "        [ --remote-to-local | --local-to-remote ]"
     echo -e "\033[1;35m"
     echo    "DESCRIPTION :"
     echo    "    --help               Help page"
     echo    "    --configure          Config remote server to support forwarding (optional)"
     echo    "                         This option will require arguments '--remote-user' and '--remote-host'"
     echo    "    --local-port         Local port number (require)"
+    echo    "    --remote-port        Remote port number (require)"
+    echo    "    --local-to-remote    Forward request from local machine to remote machine"
+    echo    "                         Either '--local-to-remote' or '--remote-to-local' argument must be specified"
+    echo    "    --remote-to-local    Forward request from remote machine to local machine (require)"
+    echo    "                         Either '--local-to-remote' or '--remote-to-local' argument must be specified"
     echo    "    --remote-user        Remote user (require)"
     echo    "    --remote-host        Remote host (require)"
-    echo    "    --remote-port        Remote port number (require)"
-    echo    "    --remote-to-local    Forward request from remote machine to local machine (require)"
-    echo    "    --local-to-remote    Forward request from local machine to remote machine (require)"
     echo -e "\033[1;36m"
     echo    "EXAMPLES :"
     echo    "    ./${scriptName} --help"
@@ -34,16 +37,16 @@ function displayUsage()
     echo    "        --remote-host 'my-server.com'"
     echo    "    ./${scriptName}"
     echo    "        --local-port 8080"
-    echo    "        --remote-user 'root'"
-    echo    "        --remote-host 'my-server.com'"
-    echo    "        --remote-port 9090"
-    echo    "        --remote-to-local"
-    echo    "    ./${scriptName}"
-    echo    "        --local-port 8080"
-    echo    "        --remote-user 'root'"
-    echo    "        --remote-host 'my-server.com'"
     echo    "        --remote-port 9090"
     echo    "        --local-to-remote"
+    echo    "        --remote-user 'root'"
+    echo    "        --remote-host 'my-server.com'"
+    echo    "    ./${scriptName}"
+    echo    "        --local-port 8080"
+    echo    "        --remote-port 9090"
+    echo    "        --remote-to-local"
+    echo    "        --remote-user 'root'"
+    echo    "        --remote-host 'my-server.com'"
     echo -e "\033[0m"
 
     exit ${1}
@@ -97,21 +100,21 @@ function verifyLocalOrRemotePort()
 function tunnel()
 {
     local localPort="${1}"
-    local remoteUser="${2}"
-    local remoteHost="${3}"
-    local remotePort="${4}"
-    local tunnelDirection="${5}"
+    local remotePort="${2}"
+    local tunnelDirection="${3}"
+    local remoteUser="${4}"
+    local remoteHost="${5}"
 
     # Verify Ports
 
-    if [[ "${tunnelDirection}" = 'remote-to-local' ]]
-    then
-        verifyLocalOrRemotePort "${localPort}" 'true'
-        verifyLocalOrRemotePort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
-    elif [[ "${tunnelDirection}" = 'local-to-remote' ]]
+    if [[ "${tunnelDirection}" = 'local-to-remote' ]]
     then
         verifyLocalOrRemotePort "${localPort}" 'false'
         verifyLocalOrRemotePort "${remotePort}" 'true' "${remoteUser}" "${remoteHost}"
+    elif [[ "${tunnelDirection}" = 'remote-to-local' ]]
+    then
+        verifyLocalOrRemotePort "${localPort}" 'true'
+        verifyLocalOrRemotePort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
     else
         fatal "\nERROR: invalid tunnel direction '${tunnelDirection}'"
     fi
@@ -132,11 +135,11 @@ function tunnel()
 
     # Start Forwarding
 
-    if [[ "${tunnelDirection}" = 'remote-to-local' ]]
+    if [[ "${tunnelDirection}" = 'local-to-remote' ]]
     then
-        doTunnel "${remoteHost}" "${remotePort}" 'localhost' "${localPort}" "${remoteUser}" "${remoteHost}" '-R'
+        doTunnel 'localhost' "${localPort}" "${remoteHost}" "${remotePort}" '-L' "${remoteUser}" "${remoteHost}"
     else
-        doTunnel 'localhost' "${localPort}" "${remoteHost}" "${remotePort}" "${remoteUser}" "${remoteHost}" '-L'
+        doTunnel "${remoteHost}" "${remotePort}" 'localhost' "${localPort}" '-R' "${remoteUser}" "${remoteHost}"
     fi
 }
 
@@ -146,9 +149,9 @@ function doTunnel()
     local sourcePort="${2}"
     local destinationHost="${3}"
     local destinationPort="${4}"
-    local remoteUser="${5}"
-    local remoteHost="${6}"
-    local directionOption="${7}"
+    local directionOption="${5}"
+    local remoteUser="${6}"
+    local remoteHost="${7}"
 
     echo -e "\n\033[1;35m${sourceHost}:${sourcePort} \033[1;36mforwards to \033[1;32m${destinationHost}:${destinationPort}\033[0m\n"
 
@@ -186,6 +189,23 @@ function main()
                 fi
 
                 ;;
+            --remote-port)
+                shift
+
+                if [[ ${#} -gt 0 ]]
+                then
+                    local remotePort="$(trimString "${1}")"
+                fi
+
+                ;;
+            --local-to-remote)
+                shift
+                local tunnelDirection='local-to-remote'
+                ;;
+            --remote-to-local)
+                shift
+                local tunnelDirection='remote-to-local'
+                ;;
             --remote-user)
                 shift
 
@@ -203,23 +223,6 @@ function main()
                     local remoteHost="$(trimString "${1}")"
                 fi
 
-                ;;
-            --remote-port)
-                shift
-
-                if [[ ${#} -gt 0 ]]
-                then
-                    local remotePort="$(trimString "${1}")"
-                fi
-
-                ;;
-            --remote-to-local)
-                shift
-                local tunnelDirection='remote-to-local'
-                ;;
-            --local-to-remote)
-                shift
-                local tunnelDirection='local-to-remote'
                 ;;
             *)
                 shift
@@ -243,20 +246,20 @@ function main()
 
         configure "${remoteUser}" "${remoteHost}"
     else
-        if [[ "$(isEmptyString "${localPort}")" = 'true' || "$(isEmptyString "${remoteUser}")" = 'true' ||
-              "$(isEmptyString "${remoteHost}")" = 'true' || "$(isEmptyString "${remotePort}")" = 'true' ||
-              "$(isEmptyString "${tunnelDirection}")" = 'true' ]]
+        if [[ "$(isEmptyString "${localPort}")" = 'true' || "$(isEmptyString "${remotePort}")" = 'true' ||
+              "$(isEmptyString "${tunnelDirection}")" = 'true' ||
+              "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
         then
             if [[ ${optCount} -gt 0 ]]
             then
-                error '\nERROR: localPort, remoteUser, remoteHost, remotePort, or tunnelDirection argument not found!'
+                error '\nERROR: localPort, remotePort, tunnelDirection, remoteUser, or remoteHost argument not found!'
                 displayUsage 1
             fi
 
             displayUsage 0
         fi
 
-        tunnel "${localPort}" "${remoteUser}" "${remoteHost}" "${remotePort}" "${tunnelDirection}"
+        tunnel "${localPort}" "${remotePort}" "${tunnelDirection}" "${remoteUser}" "${remoteHost}"
     fi
 }
 
