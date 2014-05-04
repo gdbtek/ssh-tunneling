@@ -66,7 +66,7 @@ function configure()
     ssh -n "${remoteUser}@${remoteHost}" "${commands}"
 }
 
-function verifyLocalOrRemotePort()
+function verifyPort()
 {
     local port="${1}"
     local mustExist="${2}"
@@ -109,12 +109,12 @@ function tunnel()
 
     if [[ "${tunnelDirection}" = 'local-to-remote' ]]
     then
-        verifyLocalOrRemotePort "${localPort}" 'false'
-        verifyLocalOrRemotePort "${remotePort}" 'true' "${remoteUser}" "${remoteHost}"
+        verifyPort "${localPort}" 'false'
+        verifyPort "${remotePort}" 'true' "${remoteUser}" "${remoteHost}"
     elif [[ "${tunnelDirection}" = 'remote-to-local' ]]
     then
-        verifyLocalOrRemotePort "${localPort}" 'true'
-        verifyLocalOrRemotePort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
+        verifyPort "${localPort}" 'true'
+        verifyPort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
     else
         fatal "\nERROR: invalid tunnel direction '${tunnelDirection}'"
     fi
