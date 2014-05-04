@@ -13,15 +13,18 @@ function displayUsage()
     echo    "        --remote-user <REMOTE_USER>"
     echo    "        --remote-host <REMOTE_HOST>"
     echo    "        --remote-port <REMOTE_PORT>"
+    echo    "        [ --remote-to-local | --local-to-remote ]"
     echo -e "\033[1;35m"
     echo    "DESCRIPTION :"
-    echo    "    --help           Help page"
-    echo    "    --configure      Config remote server to support forwarding (optional)"
-    echo    "                     This option will require arguments '--remote-user' and '--remote-host'"
-    echo    "    --local-port     Local port number (require)"
-    echo    "    --remote-user    Remote user (require)"
-    echo    "    --remote-host    Remote host (require)"
-    echo    "    --remote-port    Remote port number (require)"
+    echo    "    --help               Help page"
+    echo    "    --configure          Config remote server to support forwarding (optional)"
+    echo    "                         This option will require arguments '--remote-user' and '--remote-host'"
+    echo    "    --local-port         Local port number (require)"
+    echo    "    --remote-user        Remote user (require)"
+    echo    "    --remote-host        Remote host (require)"
+    echo    "    --remote-port        Remote port number (require)"
+    echo    "    --remote-to-local    Forward request from remote machine to local machine (require)"
+    echo    "    --local-to-remote    Forward request from local machine to remote machine (require)"
     echo -e "\033[1;36m"
     echo    "EXAMPLES :"
     echo    "    ./${scriptName} --help"
@@ -34,6 +37,13 @@ function displayUsage()
     echo    "        --remote-user 'root'"
     echo    "        --remote-host 'my-server.com'"
     echo    "        --remote-port 9090"
+    echo    "        --remote-to-local"
+    echo    "    ./${scriptName}"
+    echo    "        --local-port 8080"
+    echo    "        --remote-user 'root'"
+    echo    "        --remote-host 'my-server.com'"
+    echo    "        --remote-port 9090"
+    echo    "        --local-to-remote"
     echo -e "\033[0m"
 
     exit ${1}
@@ -53,30 +63,57 @@ function configure()
     ssh -n "${remoteUser}@${remoteHost}" "${commands}"
 }
 
+function verifyLocalOrRemotePort()
+{
+    local port="${1}"
+    local mustExist="${2}"
+    local remoteUser="${3}"
+    local remoteHost="${4}"
+
+    if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
+    then
+        local process="$(lsof -Pi | grep -Fi ":${port} (LISTEN)" | head -1)"
+        local machineLocation='local'
+    else
+        local process="$(ssh -n "${remoteUser}@${remoteHost}" lsof -Pi | grep -Fi ":${port} (LISTEN)" | head -1)"
+        local machineLocation="${remoteHost}"
+    fi
+
+    local isProcessNotRunning="$(isEmptyString "${process}")"
+
+    if [[ "${mustExist}" = 'true' && "${isProcessNotRunning}" = 'true' ]]
+    then
+        error "\nERROR :"
+        error "    - There is not a process listening to port ${port} on the '${machineLocation}' machine."
+        fatal "    - Please make sure your process is listening to the port ${port} before trying to tunnel.\n"
+    elif [[ "${mustExist}" = 'false' && "${isProcessNotRunning}" = 'false' ]]
+    then
+        error "\nERROR :"
+        error "    - There is a process listening to port ${port} on the '${machineLocation}' machine."
+        fatal "    - Please make sure your process is not listening to the port ${port} before trying to tunnel.\n"
+    fi
+}
+
 function tunnel()
 {
     local localPort="${1}"
     local remoteUser="${2}"
     local remoteHost="${3}"
     local remotePort="${4}"
+    local tunnelDirection="${5}"
 
     # Verify Ports
 
-    local localProcess="$(lsof -Pi | grep -Fi ":${localPort} (LISTEN)" | head -1)"
-    local remoteProcess="$(ssh -n "${remoteUser}@${remoteHost}" lsof -Pi | grep -Fi ":${remotePort} (LISTEN)" | head -1)"
-
-    if [[ "$(isEmptyString "${localProcess}")" = 'true' ]]
+    if [[ "${tunnelDirection}" = 'remote-to-local' ]]
     then
-        error "\nERROR :"
-        error "    - There is no process listening to port ${localPort} on the local machine."
-        fatal "    - Please make sure your process is listening to the port before trying to tunnel.\n"
-    fi
-
-    if [[ "$(isEmptyString "${remoteProcess}")" = 'false' ]]
+        verifyLocalOrRemotePort "${localPort}" 'true'
+        verifyLocalOrRemotePort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
+    elif [[ "${tunnelDirection}" = 'local-to-remote' ]]
     then
-        error "\nERROR :"
-        error "    - There is a process listening to port ${remotePort} on the remote machine '${remoteHost}'."
-        fatal "    - Please make sure your process is not listening to the port before trying to tunnel.\n"
+        verifyLocalOrRemotePort "${localPort}" 'false'
+        verifyLocalOrRemotePort "${remotePort}" 'true' "${remoteUser}" "${remoteHost}"
+    else
+        fatal "\nERROR: invalid tunnel direction '${tunnelDirection}'"
     fi
 
     # Verify Remote Config
@@ -95,12 +132,30 @@ function tunnel()
 
     # Start Forwarding
 
-    echo -e "\n\033[1;35m${remoteHost}:${remotePort} \033[1;36mforwards to \033[1;32mlocalhost:${localPort}\033[0m\n"
+    if [[ "${tunnelDirection}" = 'remote-to-local' ]]
+    then
+        doTunnel "${remoteHost}" "${remotePort}" 'localhost' "${localPort}" "${remoteUser}" "${remoteHost}" '-R'
+    else
+        doTunnel 'localhost' "${localPort}" "${remoteHost}" "${remotePort}" "${remoteUser}" "${remoteHost}" '-L'
+    fi
+}
+
+function doTunnel()
+{
+    local sourceHost="${1}"
+    local sourcePort="${2}"
+    local destinationHost="${3}"
+    local destinationPort="${4}"
+    local remoteUser="${5}"
+    local remoteHost="${6}"
+    local directionOption="${7}"
+
+    echo -e "\n\033[1;35m${sourceHost}:${sourcePort} \033[1;36mforwards to \033[1;32m${destinationHost}:${destinationPort}\033[0m\n"
 
     ssh -C -N -g -v \
         -p 22 \
         -c '3des-cbc' \
-        -R "${remotePort}:localhost:${localPort}" \
+        "${directionOption}" "${sourcePort}:localhost:${destinationPort}" \
         "${remoteUser}@${remoteHost}"
 }
 
@@ -158,6 +213,14 @@ function main()
                 fi
 
                 ;;
+            --remote-to-local)
+                shift
+                local tunnelDirection='remote-to-local'
+                ;;
+            --local-to-remote)
+                shift
+                local tunnelDirection='local-to-remote'
+                ;;
             *)
                 shift
                 ;;
@@ -181,18 +244,19 @@ function main()
         configure "${remoteUser}" "${remoteHost}"
     else
         if [[ "$(isEmptyString "${localPort}")" = 'true' || "$(isEmptyString "${remoteUser}")" = 'true' ||
-              "$(isEmptyString "${remoteHost}")" = 'true' || "$(isEmptyString "${remotePort}")" = 'true' ]]
+              "$(isEmptyString "${remoteHost}")" = 'true' || "$(isEmptyString "${remotePort}")" = 'true' ||
+              "$(isEmptyString "${tunnelDirection}")" = 'true' ]]
         then
             if [[ ${optCount} -gt 0 ]]
             then
-                error '\nERROR: localPort, remoteUser, remoteHost, or remotePort argument not found!'
+                error '\nERROR: localPort, remoteUser, remoteHost, remotePort, or tunnelDirection argument not found!'
                 displayUsage 1
             fi
 
             displayUsage 0
         fi
 
-        tunnel "${localPort}" "${remoteUser}" "${remoteHost}" "${remotePort}"
+        tunnel "${localPort}" "${remoteUser}" "${remoteHost}" "${remotePort}" "${tunnelDirection}"
     fi
 }
 
