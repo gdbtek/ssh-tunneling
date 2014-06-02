@@ -66,6 +66,7 @@ function appendToFileIfNotFound()
             then
                 echo -e "${string}" >> "${file}"
             else
+                echo >> "${file}"
                 echo "${string}" >> "${file}"
             fi
         fi
