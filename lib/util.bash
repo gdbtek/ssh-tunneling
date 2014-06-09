@@ -32,7 +32,7 @@ function checkRequireUser()
 
     if [[ "$(whoami)" != "${requireUser}" ]]
     then
-        fatal "ERROR: please run this program as '${requireUser}' user!"
+        fatal "FATAL: please run this program as '${requireUser}' user!"
     fi
 }
 
@@ -71,6 +71,6 @@ function appendToFileIfNotFound()
             fi
         fi
     else
-        fatal "ERROR: file '${file}' not found!"
+        fatal "FATAL: file '${file}' not found!"
     fi
 }

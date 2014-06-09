@@ -86,12 +86,12 @@ function verifyPort()
 
     if [[ "${mustExist}" = 'true' && "${isProcessNotRunning}" = 'true' ]]
     then
-        error "\nERROR :"
+        error "\nFATAL :"
         error "    - There is not a process listening to port ${port} on the '${machineLocation}' machine."
         fatal "    - Please make sure your process is listening to the port ${port} before trying to tunnel.\n"
     elif [[ "${mustExist}" = 'false' && "${isProcessNotRunning}" = 'false' ]]
     then
-        error "\nERROR :"
+        error "\nFATAL :"
         error "    - There is a process listening to port ${port} on the '${machineLocation}' machine."
         fatal "    - Please make sure your process is not listening to the port ${port} before trying to tunnel.\n"
     fi
@@ -116,7 +116,7 @@ function tunnel()
         verifyPort "${localPort}" 'true'
         verifyPort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
     else
-        fatal "\nERROR: invalid tunnel direction '${tunnelDirection}'"
+        fatal "\nFATAL: invalid tunnel direction '${tunnelDirection}'"
     fi
 
     # Verify Remote Config
