@@ -1,45 +1,8 @@
 #!/bin/bash
 
-function error()
-{
-    echo -e "\033[1;31m${1}\033[0m" 1>&2
-}
-
-function fatal()
-{
-    error "${1}"
-    exit 1
-}
-
-function trimString()
-{
-    echo "${1}" | sed -e 's/^ *//g' -e 's/ *$//g'
-}
-
-function isEmptyString()
-{
-    if [[ "$(trimString ${1})" = '' ]]
-    then
-        echo 'true'
-    else
-        echo 'false'
-    fi
-}
-
-function checkRequireUser()
-{
-    local requireUser="${1}"
-
-    if [[ "$(whoami)" != "${requireUser}" ]]
-    then
-        fatal "FATAL: please run this program as '${requireUser}' user!"
-    fi
-}
-
-function checkRequireRootUser()
-{
-    checkRequireUser 'root'
-}
+########################
+# FILE LOCAL UTILITIES #
+########################
 
 function appendToFileIfNotFound()
 {
@@ -72,5 +35,54 @@ function appendToFileIfNotFound()
         fi
     else
         fatal "FATAL: file '${file}' not found!"
+    fi
+}
+
+####################
+# STRING UTILITIES #
+####################
+
+function error()
+{
+    echo -e "\033[1;31m${1}\033[0m" 1>&2
+}
+
+function fatal()
+{
+    error "${1}"
+    exit 1
+}
+
+function isEmptyString()
+{
+    if [[ "$(trimString ${1})" = '' ]]
+    then
+        echo 'true'
+    else
+        echo 'false'
+    fi
+}
+
+function trimString()
+{
+    echo "${1}" | sed -e 's/^ *//g' -e 's/ *$//g'
+}
+
+####################
+# SYSTEM UTILITIES #
+####################
+
+function checkRequireRootUser()
+{
+    checkRequireUser 'root'
+}
+
+function checkRequireUser()
+{
+    local requireUser="${1}"
+
+    if [[ "$(whoami)" != "${requireUser}" ]]
+    then
+        fatal "\nFATAL: please run this program as '${requireUser}' user!"
     fi
 }
