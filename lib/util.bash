@@ -53,6 +53,18 @@ function fatal()
     exit 1
 }
 
+function formatPath()
+{
+    local string="${1}"
+
+    while [[ "$(echo "${string}" | grep --fixed-strings '//')" != '' ]]
+    do
+        string="$(echo "${string}" | sed --expression 's/\/\/*/\//g')"
+    done
+
+    echo "${string}" | sed --expression 's/\/$//g'
+}
+
 function isEmptyString()
 {
     if [[ "$(trimString ${1})" = '' ]]

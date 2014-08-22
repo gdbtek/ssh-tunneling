@@ -9,12 +9,13 @@ function displayUsage()
     echo    "    ${scriptName}"
     echo    "        --help"
     echo    "        --configure"
-    echo    "        --local-port  <LOCAL_PORT>"
-    echo    "        --remote-port <REMOTE_PORT>"
+    echo    "        --local-port    <LOCAL_PORT>"
+    echo    "        --remote-port   <REMOTE_PORT>"
     echo    "        --local-to-remote"
     echo    "        --remote-to-local"
-    echo    "        --remote-user <REMOTE_USER>"
-    echo    "        --remote-host <REMOTE_HOST>"
+    echo    "        --remote-user   <REMOTE_USER>"
+    echo    "        --remote-host   <REMOTE_HOST>"
+    echo    "        --identity-file <IDENTITY_FILE>"
     echo -e "\033[1;35m"
     echo    "DESCRIPTION :"
     echo    "    --help               Help page"
@@ -28,6 +29,7 @@ function displayUsage()
     echo    "                         Either '--local-to-remote' or '--remote-to-local' argument must be specified"
     echo    "    --remote-user        Remote user (require)"
     echo    "    --remote-host        Remote host (require)"
+    echo    "    --identity-file      Path to identity file such as *.ppk (optional)"
     echo -e "\033[1;36m"
     echo    "EXAMPLES :"
     echo    "    ./${scriptName} --help"
@@ -47,6 +49,13 @@ function displayUsage()
     echo    "        --remote-to-local"
     echo    "        --remote-user 'root'"
     echo    "        --remote-host 'my-server.com'"
+    echo    "    ./${scriptName}"
+    echo    "        --local-port 8080"
+    echo    "        --remote-port 9090"
+    echo    "        --remote-to-local"
+    echo    "        --remote-user 'root'"
+    echo    "        --remote-host 'my-server.com'"
+    echo    "        --identity-file '/keys/my-server/key.ppk'"
     echo -e "\033[0m"
 
     exit ${1}
@@ -224,6 +233,15 @@ function main()
                 fi
 
                 ;;
+            --identity-file)
+                shift
+
+                if [[ ${#} -gt 0 ]]
+                then
+                    local identityFile="$(formatPath "${1}")"
+                fi
+
+                ;;
             *)
                 shift
                 ;;
@@ -257,6 +275,11 @@ function main()
             fi
 
             displayUsage 0
+        fi
+
+        if [[ "$(isEmptyString "${remoteUser}")" = 'false' && ! -f "${identityFile}" ]]
+        then
+            fatal "\nFATAL: identity file '${identityFile}' not found!"
         fi
 
         tunnel "${localPort}" "${remotePort}" "${tunnelDirection}" "${remoteUser}" "${remoteHost}"
