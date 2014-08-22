@@ -285,7 +285,7 @@ function main()
 
     # Validate Identity File Input
 
-    if [[ "$(isEmptyString "${remoteUser}")" = 'false' && ! -f "${identityFile}" ]]
+    if [[ "$(isEmptyString "${identityFile}")" = 'false' && ! -f "${identityFile}" ]]
     then
         fatal "\nFATAL: identity file '${identityFile}' not found!"
     fi
