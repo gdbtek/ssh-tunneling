@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 function displayUsage()
 {
@@ -75,10 +75,10 @@ function verifyPort()
 
     if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
     then
-        local process="$(lsof -Pi | grep -Fi ":${port} (LISTEN)" | head -1)"
+        local process="$(lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
         local machineLocation='local'
     else
-        local process="$(ssh -n "${remoteUser}@${remoteHost}" lsof -Pi | grep -Fi ":${port} (LISTEN)" | head -1)"
+        local process="$(ssh -n "${remoteUser}@${remoteHost}" lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
         local machineLocation="${remoteHost}"
     fi
 
@@ -121,8 +121,8 @@ function tunnel()
 
     # Verify Remote Config
 
-    local tcpForwardConfigFound="$(ssh -n "${remoteUser}@${remoteHost}" grep -Eo "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
-    local gatewayConfigFound="$(ssh -n "${remoteUser}@${remoteHost}" grep -Eo "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
+    local tcpForwardConfigFound="$(ssh -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
+    local gatewayConfigFound="$(ssh -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
 
     if [[ "$(isEmptyString "${tcpForwardConfigFound}")" = 'true' || "$(isEmptyString "${gatewayConfigFound}")" = 'true' ]]
     then
