@@ -61,10 +61,25 @@ function displayUsage()
     exit ${1}
 }
 
+function getIdentityFileOption()
+{
+    local identityFile="${1}"
+
+    if [[ "$(isEmptyString "${identityFile}")" = 'false' && -f "${identityFile}" ]]
+    then
+        echo "-i '${identityFile}'"
+    else
+        echo
+    fi
+}
+
 function configure()
 {
     local remoteUser="${1}"
     local remoteHost="${2}"
+    local identityFile="${3}"
+
+    local identityOption="$(getIdentityFileOption '${identityFile}')"
 
     local commands="$(cat "${utilPath}")
                     checkRequireRootUser
@@ -72,7 +87,7 @@ function configure()
                     appendToFileIfNotFound '${sshdConfigFile}' '${gatewayConfigPattern}' 'GatewayPorts yes' 'true' 'true'
                     service ssh restart"
 
-    ssh -n "${remoteUser}@${remoteHost}" "${commands}"
+    ssh ${identityOption} -n "${remoteUser}@${remoteHost}" "${commands}"
 }
 
 function verifyPort()
@@ -81,13 +96,14 @@ function verifyPort()
     local mustExist="${2}"
     local remoteUser="${3}"
     local remoteHost="${4}"
+    local identityOption="${5}"
 
     if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
     then
         local process="$(lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
         local machineLocation='local'
     else
-        local process="$(ssh -n "${remoteUser}@${remoteHost}" lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
+        local process="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
         local machineLocation="${remoteHost}"
     fi
 
@@ -113,25 +129,30 @@ function tunnel()
     local tunnelDirection="${3}"
     local remoteUser="${4}"
     local remoteHost="${5}"
+    local identityFile="${6}"
+
+    # Get Identity File Option
+
+    local identityOption="$(getIdentityFileOption '${identityFile}')"
 
     # Verify Ports
 
     if [[ "${tunnelDirection}" = 'local-to-remote' ]]
     then
         verifyPort "${localPort}" 'false'
-        verifyPort "${remotePort}" 'true' "${remoteUser}" "${remoteHost}"
+        verifyPort "${remotePort}" 'true' "${remoteUser}" "${remoteHost}" "${identityOption}"
     elif [[ "${tunnelDirection}" = 'remote-to-local' ]]
     then
         verifyPort "${localPort}" 'true'
-        verifyPort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}"
+        verifyPort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}" "${identityOption}"
     else
         fatal "\nFATAL: invalid tunnel direction '${tunnelDirection}'"
     fi
 
     # Verify Remote Config
 
-    local tcpForwardConfigFound="$(ssh -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
-    local gatewayConfigFound="$(ssh -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
+    local tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
+    local gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
 
     if [[ "$(isEmptyString "${tcpForwardConfigFound}")" = 'true' || "$(isEmptyString "${gatewayConfigFound}")" = 'true' ]]
     then
@@ -161,10 +182,12 @@ function doTunnel()
     local directionOption="${5}"
     local remoteUser="${6}"
     local remoteHost="${7}"
+    local identityOption="${8}"
 
     echo -e "\n\033[1;35m${sourceHost}:${sourcePort} \033[1;36mforwards to \033[1;32m${destinationHost}:${destinationPort}\033[0m\n"
 
-    ssh -C -N -g -v \
+    ssh ${identityOption} \
+        -C -N -g -v \
         -p 22 \
         -c '3des-cbc' \
         "${directionOption}" "${sourcePort}:localhost:${destinationPort}" \
@@ -254,6 +277,15 @@ function main()
     tcpForwardConfigPattern='^\s*AllowTcpForwarding\s+yes\s*$'
     gatewayConfigPattern='^\s*GatewayPorts\s+yes\s*$'
 
+    # Validate Identity File Input
+
+    if [[ "$(isEmptyString "${remoteUser}")" = 'false' && ! -f "${identityFile}" ]]
+    then
+        fatal "\nFATAL: identity file '${identityFile}' not found!"
+    fi
+
+    # Action
+
     if [[ "${configure}" = 'true' ]]
     then
         if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
@@ -262,7 +294,7 @@ function main()
             displayUsage 1
         fi
 
-        configure "${remoteUser}" "${remoteHost}"
+        configure "${remoteUser}" "${remoteHost}" "${identityFile}"
     else
         if [[ "$(isEmptyString "${localPort}")" = 'true' || "$(isEmptyString "${remotePort}")" = 'true' ||
               "$(isEmptyString "${tunnelDirection}")" = 'true' ||
@@ -277,12 +309,7 @@ function main()
             displayUsage 0
         fi
 
-        if [[ "$(isEmptyString "${remoteUser}")" = 'false' && ! -f "${identityFile}" ]]
-        then
-            fatal "\nFATAL: identity file '${identityFile}' not found!"
-        fi
-
-        tunnel "${localPort}" "${remotePort}" "${tunnelDirection}" "${remoteUser}" "${remoteHost}"
+        tunnel "${localPort}" "${remotePort}" "${tunnelDirection}" "${remoteUser}" "${remoteHost}" "${identityFile}"
     fi
 }
 
