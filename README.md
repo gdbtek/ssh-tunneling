@@ -21,12 +21,12 @@ DESCRIPTION :
     --local-port         Local port number (require)
     --remote-port        Remote port number (require)
     --local-to-remote    Forward request from local machine to remote machine
-                         Either '--local-to-remote' or '--remote-to-local' argument must be specified
+                         Either '--local-to-remote' or '--remote-to-local' must be specified
     --remote-to-local    Forward request from remote machine to local machine (require)
-                         Either '--local-to-remote' or '--remote-to-local' argument must be specified
+                         Either '--local-to-remote' or '--remote-to-local' must be specified
     --remote-user        Remote user (require)
     --remote-host        Remote host (require)
-    --identity-file      Path to identity file (*.ppk) that allows to connect to remote server (optional)
+    --identity-file      Path to private key (*.ppk) used to connect to remote server (optional)
 
 EXAMPLES :
     ./tunnel.bash --help
@@ -34,6 +34,12 @@ EXAMPLES :
         --configure
         --remote-user 'root'
         --remote-host 'my-server.com'
+    ./tunnel.bash --help
+    ./tunnel.bash
+        --configure
+        --remote-user 'root'
+        --remote-host 'my-server.com'
+        --identity-file '/keys/my-server/key.ppk'
     ./tunnel.bash
         --local-port 8080
         --remote-port 9090
