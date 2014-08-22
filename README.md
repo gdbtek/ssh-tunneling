@@ -6,12 +6,13 @@ SYNOPSIS :
     tunnel.bash
         --help
         --configure
-        --local-port  <LOCAL_PORT>
-        --remote-port <REMOTE_PORT>
+        --local-port    <LOCAL_PORT>
+        --remote-port   <REMOTE_PORT>
         --local-to-remote
         --remote-to-local
-        --remote-user <REMOTE_USER>
-        --remote-host <REMOTE_HOST>
+        --remote-user   <REMOTE_USER>
+        --remote-host   <REMOTE_HOST>
+        --identity-file <IDENTITY_FILE>
 
 DESCRIPTION :
     --help               Help page
@@ -25,6 +26,7 @@ DESCRIPTION :
                          Either '--local-to-remote' or '--remote-to-local' argument must be specified
     --remote-user        Remote user (require)
     --remote-host        Remote host (require)
+    --identity-file      Path to identity file such as *.ppk (optional)
 
 EXAMPLES :
     ./tunnel.bash --help
@@ -44,4 +46,11 @@ EXAMPLES :
         --remote-to-local
         --remote-user 'root'
         --remote-host 'my-server.com'
+    ./tunnel.bash
+        --local-port 8080
+        --remote-port 9090
+        --remote-to-local
+        --remote-user 'root'
+        --remote-host 'my-server.com'
+        --identity-file '/keys/my-server/key.ppk'
 ```
