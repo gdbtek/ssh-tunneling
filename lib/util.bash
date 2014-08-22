@@ -21,7 +21,7 @@ function appendToFileIfNotFound()
             grepOption='--extended-regexp --only-matching'
         fi
 
-        local found="$(grep "${grepOption}" "${pattern}" "${file}")"
+        local found="$(grep ${grepOption} "${pattern}" "${file}")"
 
         if [[ "$(isEmptyString "${found}")" = 'true' ]]
         then
