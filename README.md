@@ -26,7 +26,7 @@ DESCRIPTION :
                          Either '--local-to-remote' or '--remote-to-local' argument must be specified
     --remote-user        Remote user (require)
     --remote-host        Remote host (require)
-    --identity-file      Path to identity file (such as *.ppk) that allows you to connect to remote server (optional)
+    --identity-file      Path to identity file (*.ppk) that allows to connect to remote server (optional)
 
 EXAMPLES :
     ./tunnel.bash --help

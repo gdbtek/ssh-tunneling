@@ -29,7 +29,7 @@ function displayUsage()
     echo    "                         Either '--local-to-remote' or '--remote-to-local' argument must be specified"
     echo    "    --remote-user        Remote user (require)"
     echo    "    --remote-host        Remote host (require)"
-    echo    "    --identity-file      Path to identity file (such as *.ppk) that allows you to connect to remote server (optional)"
+    echo    "    --identity-file      Path to identity file (*.ppk) that allows to connect to remote server (optional)"
     echo -e "\033[1;36m"
     echo    "EXAMPLES :"
     echo    "    ./${scriptName} --help"
