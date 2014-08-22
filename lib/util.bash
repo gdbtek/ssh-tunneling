@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ########################
 # FILE LOCAL UTILITIES #
@@ -14,11 +14,11 @@ function appendToFileIfNotFound()
 
     if [[ -f "${file}" ]]
     then
-        local grepOption='-Fo'
+        local grepOption='--fixed-strings --only-matching'
 
         if [[ "${patternAsRegex}" = 'true' ]]
         then
-            grepOption='-Eo'
+            grepOption='--extended-regexp --only-matching'
         fi
 
         local found="$(grep "${grepOption}" "${pattern}" "${file}")"
@@ -65,7 +65,7 @@ function isEmptyString()
 
 function trimString()
 {
-    echo "${1}" | sed -e 's/^ *//g' -e 's/ *$//g'
+    echo "${1}" | sed --expression 's/^ *//g' --expression 's/ *$//g'
 }
 
 ####################
@@ -79,10 +79,10 @@ function checkRequireRootUser()
 
 function checkRequireUser()
 {
-    local requireUser="${1}"
+    local user="${1}"
 
-    if [[ "$(whoami)" != "${requireUser}" ]]
+    if [[ "$(whoami)" != "${user}" ]]
     then
-        fatal "\nFATAL: please run this program as '${requireUser}' user!"
+        fatal "\nFATAL: please run this program as '${user}' user!"
     fi
 }
