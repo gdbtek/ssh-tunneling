@@ -85,7 +85,7 @@ function configure()
     local remoteHost="${2}"
     local identityFile="${3}"
 
-    local identityOption="$(getIdentityFileOption '${identityFile}')"
+    local identityOption="$(getIdentityFileOption "${identityFile}")"
 
     local commands="$(cat "${utilPath}")
                     checkRequireRootUser
@@ -139,7 +139,7 @@ function tunnel()
 
     # Get Identity File Option
 
-    local identityOption="$(getIdentityFileOption '${identityFile}')"
+    local identityOption="$(getIdentityFileOption "${identityFile}")"
 
     # Verify Ports
 
