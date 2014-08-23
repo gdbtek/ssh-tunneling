@@ -173,9 +173,9 @@ function tunnel()
 
     if [[ "${tunnelDirection}" = 'local-to-remote' ]]
     then
-        doTunnel 'localhost' "${localPort}" "${remoteHost}" "${remotePort}" '-L' "${remoteUser}" "${remoteHost}"
+        doTunnel 'localhost' "${localPort}" "${remoteHost}" "${remotePort}" '-L' "${remoteUser}" "${remoteHost}" "${identityOption}"
     else
-        doTunnel "${remoteHost}" "${remotePort}" 'localhost' "${localPort}" '-R' "${remoteUser}" "${remoteHost}"
+        doTunnel "${remoteHost}" "${remotePort}" 'localhost' "${localPort}" '-R' "${remoteUser}" "${remoteHost}" "${identityOption}"
     fi
 }
 
