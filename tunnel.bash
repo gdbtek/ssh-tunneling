@@ -206,7 +206,7 @@ function main()
     local optCount=${#}
     utilPath="${appPath}/lib/util.bash"
 
-    source "${utilPath}" || exit 1
+    source "${utilPath}"
 
     while [[ ${#} -gt 0 ]]
     do
@@ -214,10 +214,12 @@ function main()
             --help)
                 displayUsage 0
                 ;;
+
             --configure)
                 shift
                 local configure='true'
                 ;;
+
             --local-port)
                 shift
 
@@ -227,6 +229,7 @@ function main()
                 fi
 
                 ;;
+
             --remote-port)
                 shift
 
@@ -236,14 +239,17 @@ function main()
                 fi
 
                 ;;
+
             --local-to-remote)
                 shift
                 local tunnelDirection='local-to-remote'
                 ;;
+
             --remote-to-local)
                 shift
                 local tunnelDirection='remote-to-local'
                 ;;
+
             --remote-user)
                 shift
 
@@ -253,6 +259,7 @@ function main()
                 fi
 
                 ;;
+
             --remote-host)
                 shift
 
@@ -262,6 +269,7 @@ function main()
                 fi
 
                 ;;
+
             --identity-file)
                 shift
 
@@ -271,6 +279,7 @@ function main()
                 fi
 
                 ;;
+
             *)
                 shift
                 ;;
