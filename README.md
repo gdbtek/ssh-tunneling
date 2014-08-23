@@ -34,7 +34,6 @@ EXAMPLES :
         --configure
         --remote-user 'root'
         --remote-host 'my-server.com'
-    ./tunnel.bash --help
     ./tunnel.bash
         --configure
         --remote-user 'root'

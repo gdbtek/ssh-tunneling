@@ -37,7 +37,6 @@ function displayUsage()
     echo    "        --configure"
     echo    "        --remote-user 'root'"
     echo    "        --remote-host 'my-server.com'"
-    echo    "    ./${scriptName} --help"
     echo    "    ./${scriptName}"
     echo    "        --configure"
     echo    "        --remote-user 'root'"
