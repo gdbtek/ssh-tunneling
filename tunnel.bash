@@ -29,7 +29,7 @@ function displayUsage()
     echo    "                         Either '--local-to-remote' or '--remote-to-local' must be specified"
     echo    "    --remote-user        Remote user (require)"
     echo    "    --remote-host        Remote host (require)"
-    echo    "    --identity-file      Path to private key (*.ppk) used to connect to remote server (optional)"
+    echo    "    --identity-file      Path to private key (*.ppk, *.pem) used to connect to remote server (optional)"
     echo -e "\033[1;36m"
     echo    "EXAMPLES :"
     echo    "    ./${scriptName} --help"
@@ -73,7 +73,7 @@ function getIdentityFileOption()
 
     if [[ "$(isEmptyString "${identityFile}")" = 'false' && -f "${identityFile}" ]]
     then
-        echo "-i '${identityFile}'"
+        echo "-i "${identityFile}""
     else
         echo
     fi
