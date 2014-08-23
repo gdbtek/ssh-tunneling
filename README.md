@@ -26,7 +26,7 @@ DESCRIPTION :
                          Either '--local-to-remote' or '--remote-to-local' must be specified
     --remote-user        Remote user (require)
     --remote-host        Remote host (require)
-    --identity-file      Path to private key (*.ppk) used to connect to remote server (optional)
+    --identity-file      Path to private key (*.ppk, *.pem) to access remote server (optional)
 
 EXAMPLES :
     ./tunnel.bash --help
