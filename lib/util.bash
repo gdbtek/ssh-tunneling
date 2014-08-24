@@ -98,3 +98,27 @@ function checkRequireUser()
         fatal "\nFATAL: please run this program as '${user}' user!"
     fi
 }
+
+function isLinuxOperatingSystem()
+{
+    isOperatingSystem 'Linux'
+}
+
+function isMacOperatingSystem()
+{
+    isOperatingSystem 'Darwin'
+}
+
+function isOperatingSystem()
+{
+    local operatingSystem="${1}"
+
+    local found="$(uname -s | grep --extended-regexp --ignore-case --only-matching "^${operatingSystem}$")"
+
+    if [[ "$(isEmptyString "${found}")" = 'true' ]]
+    then
+        echo 'false'
+    else
+        echo 'true'
+    fi
+}
