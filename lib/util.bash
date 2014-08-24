@@ -122,3 +122,25 @@ function isOperatingSystem()
         echo 'true'
     fi
 }
+
+function isPortOpen()
+{
+    local port="${1}"
+
+    if [[ "$(isLinuxOperatingSystem)" = 'true' ]]
+    then
+        local process="$(netstat --listening --numeric --tcp --udp | grep --extended-regexp ":${port}\s+" | head -1)"
+    elif [[ "$(isMacOperatingSystem)" = 'true' ]]
+    then
+        local process="$(lsof -i -n -P | grep --extended-regexp --ignore-case ":${port}\s+\(LISTEN\)$" | head -1)"
+    else
+        fatal "\nFATAL: operating system not supported"
+    fi
+
+    if [[ "$(isEmptyString "${process}")" = 'true' ]]
+    then
+        echo 'false'
+    else
+        echo 'true'
+    fi
+}
