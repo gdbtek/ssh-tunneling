@@ -105,25 +105,27 @@ function verifyPort()
 
     if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
     then
-        local process="$(lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
+        local isProcessRunning="$(isPortOpen "port")"
         local machineLocation='local'
     else
-        local process="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" lsof -P -i | grep --fixed-strings --ignore-case ":${port} (LISTEN)" | head -1)"
+        local commands="$(cat "${utilPath}")
+                        isPortOpen '${port}'"
+        local isProcessRunning="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" "${commands}")"
         local machineLocation="${remoteHost}"
     fi
 
-    local isProcessNotRunning="$(isEmptyString "${process}")"
-
-    if [[ "${mustExist}" = 'true' && "${isProcessNotRunning}" = 'true' ]]
+    if [[ "${mustExist}" = 'true' && "${isProcessRunning}" = 'false' ]]
     then
         error "\nFATAL :"
         error "    - There is not a process listening to port ${port} on the '${machineLocation}' machine."
         fatal "    - Please make sure your process is listening to the port ${port} before trying to tunnel.\n"
-    elif [[ "${mustExist}" = 'false' && "${isProcessNotRunning}" = 'false' ]]
+    elif [[ "${mustExist}" = 'false' && "${isProcessRunning}" = 'true' ]]
     then
         error "\nFATAL :"
         error "    - There is a process listening to port ${port} on the '${machineLocation}' machine."
         fatal "    - Please make sure your process is not listening to the port ${port} before trying to tunnel.\n"
+    else
+        fatal "\nFATAL: verifyPort failed"
     fi
 }
 
