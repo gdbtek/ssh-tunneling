@@ -124,8 +124,6 @@ function verifyPort()
         error "\nFATAL :"
         error "    - There is a process listening to port ${port} on the '${machineLocation}' machine."
         fatal "    - Please make sure your process is not listening to the port ${port} before trying to tunnel.\n"
-    else
-        fatal "\nFATAL: verifyPort failed"
     fi
 }
 
