@@ -105,7 +105,7 @@ function verifyPort()
 
     if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
     then
-        local isProcessRunning="$(isPortOpen "port")"
+        local isProcessRunning="$(isPortOpen "${port}")"
         local machineLocation='local'
     else
         local commands="$(cat "${utilPath}")
