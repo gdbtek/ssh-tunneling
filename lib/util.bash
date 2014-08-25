@@ -14,11 +14,11 @@ function appendToFileIfNotFound()
 
     if [[ -f "${file}" ]]
     then
-        local grepOption='--fixed-strings --only-matching'
+        local grepOption='-F -o'
 
         if [[ "${patternAsRegex}" = 'true' ]]
         then
-            grepOption='--extended-regexp --only-matching'
+            grepOption='-E -o'
         fi
 
         local found="$(grep ${grepOption} "${pattern}" "${file}")"
@@ -57,7 +57,7 @@ function formatPath()
 {
     local string="${1}"
 
-    while [[ "$(echo "${string}" | grep --fixed-strings '//')" != '' ]]
+    while [[ "$(echo "${string}" | grep -F '//')" != '' ]]
     do
         string="$(echo "${string}" | sed -e 's/\/\/*/\//g')"
     done
@@ -113,7 +113,7 @@ function isOperatingSystem()
 {
     local operatingSystem="${1}"
 
-    local found="$(uname -s | grep --extended-regexp --ignore-case --only-matching "^${operatingSystem}$")"
+    local found="$(uname -s | grep -E -i -o "^${operatingSystem}$")"
 
     if [[ "$(isEmptyString "${found}")" = 'true' ]]
     then
@@ -134,10 +134,10 @@ function isPortOpen()
 
     if [[ "$(isLinuxOperatingSystem)" = 'true' ]]
     then
-        local process="$(netstat --listening --numeric --tcp --udp | grep --extended-regexp ":${port}\s+" | head -1)"
+        local process="$(netstat -l -n -t -u | grep -E ":${port}\s+" | head -1)"
     elif [[ "$(isMacOperatingSystem)" = 'true' ]]
     then
-        local process="$(lsof -i -n -P | grep --extended-regexp --ignore-case ":${port}\s+\(LISTEN\)$" | head -1)"
+        local process="$(lsof -i -n -P | grep -E -i ":${port}\s+\(LISTEN\)$" | head -1)"
     else
         fatal "\nFATAL: operating system not supported"
     fi
