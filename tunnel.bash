@@ -156,8 +156,8 @@ function tunnel()
 
     # Verify Remote Config
 
-    local tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
-    local gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep --extended-regexp --only-matching "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
+    local tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -o -E "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
+    local gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -o -E "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
 
     if [[ "$(isEmptyString "${tcpForwardConfigFound}")" = 'true' || "$(isEmptyString "${gatewayConfigFound}")" = 'true' ]]
     then
