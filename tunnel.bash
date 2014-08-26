@@ -156,8 +156,8 @@ function tunnel()
 
     # Verify Remote Config
 
-    local tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -o -E "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
-    local gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -o -E "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
+    local tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -E -o "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
+    local gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -E -o "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
 
     if [[ "$(isEmptyString "${tcpForwardConfigFound}")" = 'true' || "$(isEmptyString "${gatewayConfigFound}")" = 'true' ]]
     then
@@ -191,10 +191,13 @@ function doTunnel()
 
     echo -e "\n\033[1;35m${sourceHost}:${sourcePort} \033[1;36mforwards to \033[1;32m${destinationHost}:${destinationPort}\033[0m\n"
 
-    ssh ${identityOption} \
-        -C -N -g -v \
+    ssh -c '3des-cbc' \
+        -C \
+        -g \
+        -N \
         -p 22 \
-        -c '3des-cbc' \
+        -v \
+        ${identityOption} \
         "${directionOption}" "${sourcePort}:localhost:${destinationPort}" \
         "${remoteUser}@${remoteHost}"
 }

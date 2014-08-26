@@ -14,11 +14,11 @@ function appendToFileIfNotFound()
 
     if [[ -f "${file}" ]]
     then
-        local grepOption='-o -F'
+        local grepOption='-F -o'
 
         if [[ "${patternAsRegex}" = 'true' ]]
         then
-            grepOption='-o -E'
+            grepOption='-E -o'
         fi
 
         local found="$(grep ${grepOption} "${pattern}" "${file}")"
@@ -113,7 +113,7 @@ function isOperatingSystem()
 {
     local operatingSystem="${1}"
 
-    local found="$(uname -s | grep -i -o -E "^${operatingSystem}$")"
+    local found="$(uname -s | grep -E -i -o "^${operatingSystem}$")"
 
     if [[ "$(isEmptyString "${found}")" = 'true' ]]
     then
@@ -137,7 +137,7 @@ function isPortOpen()
         local process="$(netstat -l -n -t -u | grep -E ":${port}\s+" | head -1)"
     elif [[ "$(isMacOperatingSystem)" = 'true' ]]
     then
-        local process="$(lsof -i -n -P | grep -i -E ":${port}\s+\(LISTEN\)$" | head -1)"
+        local process="$(lsof -i -n -P | grep -E -i ":${port}\s+\(LISTEN\)$" | head -1)"
     else
         fatal "\nFATAL: operating system not supported"
     fi
