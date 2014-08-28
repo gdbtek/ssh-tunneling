@@ -151,7 +151,7 @@ function tunnel()
         verifyPort "${localPort}" 'true'
         verifyPort "${remotePort}" 'false' "${remoteUser}" "${remoteHost}" "${identityOption}"
     else
-        fatal "\nFATAL: invalid tunnel direction '${tunnelDirection}'"
+        fatal "\nFATAL : invalid tunnel direction '${tunnelDirection}'"
     fi
 
     # Verify Remote Config
@@ -298,7 +298,7 @@ function main()
 
     if [[ "$(isEmptyString "${identityFile}")" = 'false' && ! -f "${identityFile}" ]]
     then
-        fatal "\nFATAL: identity file '${identityFile}' not found!"
+        fatal "\nFATAL : identity file '${identityFile}' not found!"
     fi
 
     # Action
@@ -307,7 +307,7 @@ function main()
     then
         if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
         then
-            error '\nERROR: remoteUser or remoteHost argument not found!'
+            error '\nERROR : remoteUser or remoteHost argument not found!'
             displayUsage 1
         fi
 
@@ -319,7 +319,7 @@ function main()
         then
             if [[ ${optCount} -gt 0 ]]
             then
-                error '\nERROR: localPort, remotePort, tunnelDirection, remoteUser, or remoteHost argument not found!'
+                error '\nERROR : localPort, remotePort, tunnelDirection, remoteUser, or remoteHost argument not found!'
                 displayUsage 1
             fi
 

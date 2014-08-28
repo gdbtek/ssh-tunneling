@@ -34,7 +34,7 @@ function appendToFileIfNotFound()
             fi
         fi
     else
-        fatal "FATAL: file '${file}' not found!"
+        fatal "FATAL : file '${file}' not found!"
     fi
 }
 
@@ -95,7 +95,7 @@ function checkRequireUser()
 
     if [[ "$(whoami)" != "${user}" ]]
     then
-        fatal "\nFATAL: please run this program as '${user}' user!"
+        fatal "\nFATAL : please run this program as '${user}' user!"
     fi
 }
 
@@ -129,7 +129,7 @@ function isPortOpen()
 
     if [[ "$(isEmptyString "${port}")" = 'true' ]]
     then
-        fatal "\nFATAL: port undefined"
+        fatal "\nFATAL : port undefined"
     fi
 
     if [[ "$(isLinuxOperatingSystem)" = 'true' ]]
@@ -139,7 +139,7 @@ function isPortOpen()
     then
         local process="$(lsof -i -n -P | grep -E -i ":${port}\s+\(LISTEN\)$" | head -1)"
     else
-        fatal "\nFATAL: operating system not supported"
+        fatal "\nFATAL : operating system not supported"
     fi
 
     if [[ "$(isEmptyString "${process}")" = 'true' ]]
