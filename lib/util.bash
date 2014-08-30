@@ -55,14 +55,14 @@ function fatal()
 
 function formatPath()
 {
-    local string="${1}"
+    local path="${1}"
 
-    while [[ "$(echo "${string}" | grep -F '//')" != '' ]]
+    while [[ "$(echo "${path}" | grep -F '//')" != '' ]]
     do
-        string="$(echo "${string}" | sed -e 's/\/\/*/\//g')"
+        path="$(echo "${path}" | sed -e 's/\/\/*/\//g')"
     done
 
-    echo "${string}" | sed -e 's/\/$//g'
+    echo "${path}" | sed -e 's/\/$//g'
 }
 
 function isEmptyString()
