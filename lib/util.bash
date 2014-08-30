@@ -12,29 +12,29 @@ function appendToFileIfNotFound()
     local patternAsRegex="${4}"
     local stringAsRegex="${5}"
 
-    if [[ -f "${file}" ]]
+    if [[ ! -f "${file}" ]]
     then
-        local grepOption='-F -o'
-
-        if [[ "${patternAsRegex}" = 'true' ]]
-        then
-            grepOption='-E -o'
-        fi
-
-        local found="$(grep ${grepOption} "${pattern}" "${file}")"
-
-        if [[ "$(isEmptyString "${found}")" = 'true' ]]
-        then
-            if [[ "${stringAsRegex}" = 'true' ]]
-            then
-                echo -e "${string}" >> "${file}"
-            else
-                echo >> "${file}"
-                echo "${string}" >> "${file}"
-            fi
-        fi
-    else
         fatal "FATAL : file '${file}' not found!"
+    fi
+
+    local grepOption='-F -o'
+
+    if [[ "${patternAsRegex}" = 'true' ]]
+    then
+        grepOption='-E -o'
+    fi
+
+    local found="$(grep ${grepOption} "${pattern}" "${file}")"
+
+    if [[ "$(isEmptyString "${found}")" = 'true' ]]
+    then
+        if [[ "${stringAsRegex}" = 'true' ]]
+        then
+            echo -e "${string}" >> "${file}"
+        else
+            echo >> "${file}"
+            echo "${string}" >> "${file}"
+        fi
     fi
 }
 
