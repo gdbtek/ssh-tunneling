@@ -12,10 +12,7 @@ function appendToFileIfNotFound()
     local patternAsRegex="${4}"
     local stringAsRegex="${5}"
 
-    if [[ ! -f "${file}" ]]
-    then
-        fatal "FATAL : file '${file}' not found!"
-    fi
+    checkExistFile "${file}"
 
     local grepOption='-F -o'
 
@@ -83,6 +80,22 @@ function trimString()
 ####################
 # SYSTEM UTILITIES #
 ####################
+
+function checkExistFile()
+{
+    local file="${1}"
+    local errorMessage="${2}"
+
+    if [[ "${file}" = '' || ! -f "${file}" ]]
+    then
+        if [[ "$(isEmptyString "${errorMessage}")" = 'true' ]]
+        then
+            fatal "\nFATAL : file '${file}' not found!"
+        else
+            fatal "\nFATAL : ${errorMessage}"
+        fi
+    fi
+}
 
 function checkRequireRootUser()
 {
