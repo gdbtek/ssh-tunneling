@@ -11,8 +11,22 @@ function appendToFileIfNotFound()
     local string="${3}"
     local patternAsRegex="${4}"
     local stringAsRegex="${5}"
+    local addNewLine="${6}"
+
+    # Validate Inputs
 
     checkExistFile "${file}"
+    checkNonEmptyString "${pattern}" 'undefined pattern'
+    checkNonEmptyString "${string}" 'undefined string'
+    checkTrueFalseString "${patternAsRegex}"
+    checkTrueFalseString "${stringAsRegex}"
+
+    if [[ "${stringAsRegex}" = 'false' ]]
+    then
+        checkTrueFalseString "${addNewLine}"
+    fi
+
+    # Append String
 
     local grepOption='-F -o'
 
@@ -29,7 +43,11 @@ function appendToFileIfNotFound()
         then
             echo -e "${string}" >> "${file}"
         else
-            echo >> "${file}"
+            if [[ "${addNewLine}" = 'true' ]]
+            then
+                echo >> "${file}"
+            fi
+
             echo "${string}" >> "${file}"
         fi
     fi
@@ -38,6 +56,32 @@ function appendToFileIfNotFound()
 ####################
 # STRING UTILITIES #
 ####################
+
+function checkNonEmptyString()
+{
+    local string="${1}"
+    local errorMessage="${2}"
+
+    if [[ "$(isEmptyString "${string}")" = 'true' ]]
+    then
+        if [[ "$(isEmptyString "${errorMessage}")" = 'true' ]]
+        then
+            fatal "\nFATAL : empty value detected"
+        else
+            fatal "\nFATAL : ${errorMessage}"
+        fi
+    fi
+}
+
+function checkTrueFalseString()
+{
+    local string="${1}"
+
+    if [[ "${string}" != 'true' && "${string}" != 'false' ]]
+    then
+        fatal "\nFATAL : '${string}' is not 'true' or 'false'"
+    fi
+}
 
 function error()
 {
@@ -90,7 +134,7 @@ function checkExistFile()
     then
         if [[ "$(isEmptyString "${errorMessage}")" = 'true' ]]
         then
-            fatal "\nFATAL : file '${file}' not found!"
+            fatal "\nFATAL : file '${file}' not found"
         else
             fatal "\nFATAL : ${errorMessage}"
         fi
@@ -99,16 +143,16 @@ function checkExistFile()
 
 function checkRequireRootUser()
 {
-    checkRequireUser 'root'
+    checkRequireUserLogin 'root'
 }
 
-function checkRequireUser()
+function checkRequireUserLogin()
 {
-    local user="${1}"
+    local userLogin="${1}"
 
-    if [[ "$(whoami)" != "${user}" ]]
+    if [[ "$(whoami)" != "${userLogin}" ]]
     then
-        fatal "\nFATAL : please run this program as '${user}' user!"
+        fatal "\nFATAL : user login '${userLogin}' required"
     fi
 }
 
@@ -140,10 +184,7 @@ function isPortOpen()
 {
     local port="${1}"
 
-    if [[ "$(isEmptyString "${port}")" = 'true' ]]
-    then
-        fatal "\nFATAL : port undefined"
-    fi
+    checkNonEmptyString "${port}" 'undefined port'
 
     if [[ "$(isLinuxOperatingSystem)" = 'true' ]]
     then
