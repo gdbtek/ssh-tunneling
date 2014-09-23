@@ -206,7 +206,7 @@ function main()
 {
     local appPath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local optCount=${#}
-    utilPath="${appPath}/lib/util.bash"
+    utilPath="${appPath}/libraries/util.bash"
 
     source "${utilPath}"
 
