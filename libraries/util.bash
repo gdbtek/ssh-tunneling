@@ -28,14 +28,14 @@ function appendToFileIfNotFound()
 
     # Append String
 
-    local grepOption='-F -o'
+    local grepOptions=('-F' '-o')
 
     if [[ "${patternAsRegex}" = 'true' ]]
     then
-        grepOption='-E -o'
+        grepOptions=('-E' '-o')
     fi
 
-    local found="$(grep ${grepOption} "${pattern}" "${file}")"
+    local found="$(grep "${grepOptions[@]}" "${pattern}" "${file}")"
 
     if [[ "$(isEmptyString "${found}")" = 'true' ]]
     then
@@ -85,12 +85,16 @@ function checkTrueFalseString()
 
 function error()
 {
-    echo -e "\033[1;31m${1}\033[0m" 1>&2
+    local message="${1}"
+
+    echo -e "\033[1;31m${message}\033[0m" 1>&2
 }
 
 function fatal()
 {
-    error "${1}"
+    local message="${1}"
+
+    error "${message}"
     exit 1
 }
 
@@ -98,17 +102,19 @@ function formatPath()
 {
     local path="${1}"
 
-    while [[ "$(echo "${path}" | grep -F '//')" != '' ]]
+    while [[ "$(grep -F '//' <<< "${path}")" != '' ]]
     do
-        path="$(echo "${path}" | sed -e 's/\/\/*/\//g')"
+        path="$(sed -e 's/\/\/*/\//g' <<< "${path}")"
     done
 
-    echo "${path}" | sed -e 's/\/$//g'
+    sed -e 's/\/$//g' <<< "${path}"
 }
 
 function isEmptyString()
 {
-    if [[ "$(trimString ${1})" = '' ]]
+    local string="${1}"
+
+    if [[ "$(trimString "${string}")" = '' ]]
     then
         echo 'true'
     else
@@ -118,7 +124,9 @@ function isEmptyString()
 
 function trimString()
 {
-    echo "${1}" | sed -e 's/^ *//g' -e 's/ *$//g'
+    local string="${1}"
+
+    sed -e 's/^ *//g' -e 's/ *$//g' <<< "${string}"
 }
 
 ####################
