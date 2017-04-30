@@ -219,6 +219,7 @@ function main()
 
             --configure)
                 shift
+
                 local configure='true'
                 ;;
 
@@ -244,11 +245,13 @@ function main()
 
             --local-to-remote)
                 shift
+
                 local tunnelDirection='local-to-remote'
                 ;;
 
             --remote-to-local)
                 shift
+
                 local tunnelDirection='remote-to-local'
                 ;;
 
