@@ -33,9 +33,13 @@ function displayUsage()
     echo -e "\033[1;36m"
     echo    "EXAMPLES :"
     echo    "    ./${scriptName} --help"
+    echo
     echo    "    ./${scriptName} --configure --remote-user 'root' --remote-host 'my-server.com'"
     echo    "    ./${scriptName} --configure --remote-user 'root' --remote-host 'my-server.com' --identity-file '/keys/my-server/key.ppk'"
+    echo
     echo    "    ./${scriptName} --local-port 8080 --remote-port 9090 --local-to-remote --remote-user 'root' --remote-host 'my-server.com'"
+    echo    "    ./${scriptName} --local-port 8080 --remote-port 9090 --local-to-remote --remote-user 'root' --remote-host 'my-server.com' --identity-file '/keys/my-server/key.ppk'"
+    echo
     echo    "    ./${scriptName} --local-port 8080 --remote-port 9090 --remote-to-local --remote-user 'root' --remote-host 'my-server.com'"
     echo    "    ./${scriptName} --local-port 8080 --remote-port 9090 --remote-to-local --remote-user 'root' --remote-host 'my-server.com' --identity-file '/keys/my-server/key.ppk'"
     echo -e "\033[0m"
