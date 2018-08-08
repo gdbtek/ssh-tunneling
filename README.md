@@ -30,32 +30,13 @@ DESCRIPTION :
 
 EXAMPLES :
     ./tunnel.bash --help
-    ./tunnel.bash
-        --configure
-        --remote-user 'root'
-        --remote-host 'my-server.com'
-    ./tunnel.bash
-        --configure
-        --remote-user 'root'
-        --remote-host 'my-server.com'
-        --identity-file '/keys/my-server/key.ppk'
-    ./tunnel.bash
-        --local-port 8080
-        --remote-port 9090
-        --local-to-remote
-        --remote-user 'root'
-        --remote-host 'my-server.com'
-    ./tunnel.bash
-        --local-port 8080
-        --remote-port 9090
-        --remote-to-local
-        --remote-user 'root'
-        --remote-host 'my-server.com'
-    ./tunnel.bash
-        --local-port 8080
-        --remote-port 9090
-        --remote-to-local
-        --remote-user 'root'
-        --remote-host 'my-server.com'
-        --identity-file '/keys/my-server/key.ppk'
+
+    ./tunnel.bash --configure --remote-user 'root' --remote-host 'my-server.com'
+    ./tunnel.bash --configure --remote-user 'root' --remote-host 'my-server.com' --identity-file '/keys/my-server/key.ppk'
+
+    ./tunnel.bash --local-port 8080 --remote-port 9090 --local-to-remote --remote-user 'root' --remote-host 'my-server.com'
+    ./tunnel.bash --local-port 8080 --remote-port 9090 --local-to-remote --remote-user 'root' --remote-host 'my-server.com' --identity-file '/keys/my-server/key.ppk'
+
+    ./tunnel.bash --local-port 8080 --remote-port 9090 --remote-to-local --remote-user 'root' --remote-host 'my-server.com'
+    ./tunnel.bash --local-port 8080 --remote-port 9090 --remote-to-local --remote-user 'root' --remote-host 'my-server.com' --identity-file '/keys/my-server/key.ppk'
 ```
