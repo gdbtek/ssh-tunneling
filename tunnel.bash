@@ -2,7 +2,7 @@
 
 function displayUsage()
 {
-    local scriptName="$(basename "${BASH_SOURCE[0]}")"
+    local -r scriptName="$(basename "${BASH_SOURCE[0]}")"
 
     echo -e "\033[1;33m"
     echo    "SYNOPSIS :"
@@ -65,13 +65,15 @@ function configure()
     local remoteHost="${2}"
     local identityFile="${3}"
 
-    local identityOption="$(getIdentityFileOption "${identityFile}")"
+    local identityOption=''
+    identityOption="$(getIdentityFileOption "${identityFile}")"
 
-    local commands="$(cat "${utilPath}")
-                    checkRequireRootUser
-                    appendToFileIfNotFound '${sshdConfigFile}' '${tcpForwardConfigPattern}' '\nAllowTcpForwarding yes' 'true' 'true'
-                    appendToFileIfNotFound '${sshdConfigFile}' '${gatewayConfigPattern}' 'GatewayPorts yes' 'true' 'true'
-                    service ssh restart"
+    local commands=''
+    commands="$(cat "${utilPath}")
+                checkRequireRootUser
+                appendToFileIfNotFound '${sshdConfigFile}' '${tcpForwardConfigPattern}' '\nAllowTcpForwarding yes' 'true' 'true'
+                appendToFileIfNotFound '${sshdConfigFile}' '${gatewayConfigPattern}' 'GatewayPorts yes' 'true' 'true'
+                service ssh restart"
 
     ssh ${identityOption} -n "${remoteUser}@${remoteHost}" "${commands}"
 }
@@ -86,12 +88,18 @@ function verifyPort()
 
     if [[ "$(isEmptyString "${remoteUser}")" = 'true' || "$(isEmptyString "${remoteHost}")" = 'true' ]]
     then
-        local isProcessRunning="$(isPortOpen "${port}")"
+        local isProcessRunning=''
+        isProcessRunning="$(isPortOpen "${port}")"
+
         local machineLocation='local'
     else
-        local commands="$(cat "${utilPath}")
-                        isPortOpen '${port}'"
-        local isProcessRunning="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" "${commands}")"
+        local commands=''
+        commands="$(cat "${utilPath}")
+                    isPortOpen '${port}'"
+
+        local isProcessRunning=''
+        isProcessRunning="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" "${commands}")"
+
         local machineLocation="${remoteHost}"
     fi
 
@@ -119,7 +127,8 @@ function tunnel()
 
     # Get Identity File Option
 
-    local identityOption="$(getIdentityFileOption "${identityFile}")"
+    local identityOption=''
+    identityOption="$(getIdentityFileOption "${identityFile}")"
 
     # Verify Ports
 
@@ -137,8 +146,11 @@ function tunnel()
 
     # Verify Remote Config
 
-    local tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -E -o "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
-    local gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -E -o "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
+    local tcpForwardConfigFound=''
+    tcpForwardConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -E -o "'${tcpForwardConfigPattern}'" "'${sshdConfigFile}'")"
+
+    local gatewayConfigFound=''
+    gatewayConfigFound="$(ssh ${identityOption} -n "${remoteUser}@${remoteHost}" grep -E -o "'${gatewayConfigPattern}'" "'${sshdConfigFile}'")"
 
     if [[ "$(isEmptyString "${tcpForwardConfigFound}")" = 'true' || "$(isEmptyString "${gatewayConfigFound}")" = 'true' ]]
     then
@@ -185,7 +197,9 @@ function doTunnel()
 
 function main()
 {
-    local appPath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local appPath=''
+    appPath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
     local optCount=${#}
     utilPath="${appPath}/libraries/util.bash"
 
@@ -209,7 +223,8 @@ function main()
 
                 if [[ ${#} -gt 0 ]]
                 then
-                    local localPort="$(trimString "${1}")"
+                    local localPort=''
+                    localPort="$(trimString "${1}")"
                 fi
 
                 ;;
@@ -219,7 +234,8 @@ function main()
 
                 if [[ ${#} -gt 0 ]]
                 then
-                    local remotePort="$(trimString "${1}")"
+                    local remotePort=''
+                    remotePort="$(trimString "${1}")"
                 fi
 
                 ;;
@@ -241,7 +257,8 @@ function main()
 
                 if [[ ${#} -gt 0 ]]
                 then
-                    local remoteUser="$(trimString "${1}")"
+                    local remoteUser=''
+                    remoteUser="$(trimString "${1}")"
                 fi
 
                 ;;
@@ -251,7 +268,8 @@ function main()
 
                 if [[ ${#} -gt 0 ]]
                 then
-                    local remoteHost="$(trimString "${1}")"
+                    local remoteHost=''
+                    remoteHost="$(trimString "${1}")"
                 fi
 
                 ;;
@@ -261,7 +279,8 @@ function main()
 
                 if [[ ${#} -gt 0 ]]
                 then
-                    local identityFile="$(formatPath "${1}")"
+                    local identityFile=''
+                    identityFile="$(formatPath "${1}")"
                 fi
 
                 ;;
