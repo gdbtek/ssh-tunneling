@@ -71,8 +71,20 @@ function configure()
     local commands=''
     commands="$(cat "${utilPath}")
                 checkRequireRootUser
-                appendToFileIfNotFound '${sshdConfigFile}' '${tcpForwardConfigPattern}' '\nAllowTcpForwarding yes' 'true' 'true'
-                appendToFileIfNotFound '${sshdConfigFile}' '${gatewayConfigPattern}' 'GatewayPorts yes' 'true' 'true'
+                appendToFileIfNotFound \
+                    '${sshdConfigFile}' \
+                    '${tcpForwardConfigPattern}' \
+                    '\nAllowTcpForwarding yes' \
+                    'true' \
+                    'true' \
+                    'true'
+                appendToFileIfNotFound \
+                    '${sshdConfigFile}' \
+                    '${gatewayConfigPattern}' \
+                    'GatewayPorts yes' \
+                    'true' \
+                    'true' \
+                    'true'
                 service ssh restart"
 
     ssh ${identityOption} -n "${remoteUser}@${remoteHost}" "${commands}"
